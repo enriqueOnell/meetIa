@@ -1,21 +1,19 @@
 # AGENTS.md — MeetingAI MVP
 
 ## Proyecto
-Aplicación web diseñada para crear salas de videollamada, capturar transcripciones de voz en tiempo real y generar resúmenes automáticos mediante inteligencia artificial[cite: 2]. Arquitectura dividida en un cliente (React + Vite) y un servidor (Node + Express) integrado con Jitsi, Web Speech API y OpenAI.
+Aplicación web (MVP) para transcripción en tiempo real y resumen inteligente de reuniones usando React, Vite, Express, Jitsi IFrame API y LLMs independientes (DeepSeek 4.1 Flash o Gemma).
 
 ## Comandos
-- Ejecutar Frontend: `npm run dev` (En puerto 5173, desde carpeta `/client`).
-- Ejecutar Backend: `npm run dev` (Requiere nodemon, en puerto 3000, desde carpeta `/server`).
-- Instalar dependencias: `npm install` (Ejecutar independientemente en ambas carpetas).
+- Frontend: `cd client && npm run dev` (puerto 5173)
+- Backend: `cd server && npm run dev` (puerto 3000)
+- Estilos: Tailwind ya está inicializado vía `npx tailwindcss init -p`.
 
 ## Estilo y convenciones
-- Javascript moderno (ES6+) con Hooks funcionales en React[cite: 2].
-- Diseño estético estricto mediante Tailwind CSS utilizando tema oscuro (fondo carbón `#121212` y superficie `#1e1e1e`) con acentos violetas (`#8b5cf6`).
+- Frontend en React (JSX), ECMAScript moderno, TailwindCSS para estilos.
+- Backend en Node.js + Express.
+- Idioma del código en inglés (variables, funciones), pero las respuestas UI de la IA y documentación en español.
 
 ## Reglas
-- Lee `docs/constitution.md` y la spec activa antes de tocar código[cite: 2].
-- No alterar las variables de entorno sin antes añadir su equivalente en `.env.example`.
-- Si fallan los permisos de micrófono de la Web Speech API, mostrar SIEMPRE un input manual como fallback.
-
-## Al terminar cualquier tarea
-- Ejecutar la suite completa para asegurar que ambos servidores levantan correctamente[cite: 2] y que el JSON del reporte de IA se muestra de forma íntegra en la UI.
+- Lee `docs/constitution.md` y la spec activa en `specs/001-meetingai-mvp/spec.md` antes de tocar código.
+- Tienes prohibido usar la API estándar de OpenAI (GPT-4/3.5). Todo procesamiento debe realizarse configurando el cliente para DeepSeek 4.1 Flash o Gemma (ej. usando Groq o la base URL de DeepSeek).
+- Al terminar cualquier tarea: Verifica que tanto el cliente como el servidor levanten sin errores de dependencias.
