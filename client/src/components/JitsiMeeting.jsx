@@ -14,7 +14,6 @@ function parseJitsiTarget(input) {
     try {
       const url = new URL(trimmed);
       const domain = url.host || 'meet.jit.si';
-      // Extraer path sin '/' inicial ni params
       const pathRoom = url.pathname.replace(/^\/+/, '').split('/')[0];
       return {
         domain: domain || 'meet.jit.si',
@@ -62,7 +61,10 @@ export default function JitsiMeeting({ meetingInput, displayName, onLeave }) {
     // Limpiar instancia previa si existe
     if (apiRef.current) {
       apiRef.current.dispose();
+      apiRef.current = null;
     }
+
+    setLoading(true);
 
     const options = {
       roomName: roomName || 'MeetingAI-Room-Demo',
@@ -100,33 +102,44 @@ export default function JitsiMeeting({ meetingInput, displayName, onLeave }) {
       const api = new window.JitsiMeetExternalAPI(domain, options);
       apiRef.current = api;
 
+      // Eventos para ocultar el spinner de carga de inmediato
       api.addEventListeners({
         videoConferenceJoined: () => {
+          setLoading(false);
+        },
+        participantJoined: () => {
           setLoading(false);
         },
         videoConferenceLeft: () => {
           if (onLeave) onLeave();
         }
       });
+
+      // Timeout de seguridad: Si a los 2.5s Jitsi ya cargó la interfaz pero requiere interacción del usuario (lobby/guest),
+      // retiramos el overlay de carga para que el usuario pueda hacer clic libremente.
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 2500);
+
+      return () => {
+        clearTimeout(timer);
+        if (apiRef.current) {
+          apiRef.current.dispose();
+          apiRef.current = null;
+        }
+      };
     } catch (err) {
       console.error('Error inicializando Jitsi Meet:', err);
       setLoading(false);
     }
-
-    return () => {
-      if (apiRef.current) {
-        apiRef.current.dispose();
-        apiRef.current = null;
-      }
-    };
   }, [domain, roomName, displayName, onLeave]);
 
   return (
     <div className="relative w-full h-full min-h-[500px] rounded-2xl overflow-hidden border border-gray-800 bg-[#16161a] shadow-2xl flex flex-col">
       {loading && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#121212]/90 backdrop-blur-sm">
-          <div className="w-12 h-12 border-4 border-violet-500/20 border-t-violet-500 rounded-full animate-spin mb-4" />
-          <p className="text-gray-300 font-medium">Conectando a la reunión de Jitsi...</p>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#121212]/80 backdrop-blur-sm transition-opacity duration-300 pointer-events-none">
+          <div className="w-10 h-10 border-3 border-violet-500/20 border-t-violet-500 rounded-full animate-spin mb-3" />
+          <p className="text-gray-300 text-sm font-medium">Iniciando videollamada...</p>
           <span className="text-xs text-gray-500 mt-1">
             {domain}/{roomName}
           </span>

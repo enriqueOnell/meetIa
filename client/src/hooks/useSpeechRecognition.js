@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * Hook para transcripción de voz utilizando la Web Speech API nativa.
- * Incluye fallback de soporte y sincronización de transcripción en tiempo real.
+ * Maneja de forma robusta navegadores con soporte limitado (como Firefox)
+ * y errores de red o concurrencia de micrófono con WebRTC/Jitsi.
  */
 export function useSpeechRecognition() {
   const [isListening, setIsListening] = useState(false);
@@ -15,11 +16,16 @@ export function useSpeechRecognition() {
   const isListeningRef = useRef(false);
 
   useEffect(() => {
+    const isFirefox = typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setIsSupported(false);
-      setError('La Web Speech API no está soportada en este navegador. Puedes usar el cuadro de texto manual.');
+      setError(
+        isFirefox
+          ? 'Firefox no habilita reconocimiento de voz de forma predeterminada. Usa Chrome/Brave/Edge o escribe notas directamente en el cuadro de texto.'
+          : 'Web Speech API no está disponible en este navegador. Puedes usar el cuadro de texto manual.'
+      );
       return;
     }
 
@@ -56,22 +62,28 @@ export function useSpeechRecognition() {
 
       recognition.onerror = (event) => {
         console.warn('SpeechRecognition error:', event.error);
+        isListeningRef.current = false;
+        setIsListening(false);
+
         if (event.error === 'not-allowed') {
-          setError('Permiso de micrófono denegado. Habilita el acceso o usa el cuadro de texto.');
-          setIsListening(false);
-          isListeningRef.current = false;
+          setError('Permiso de micrófono bloqueado. Habilita el acceso o usa el cuadro de texto.');
+        } else if (event.error === 'network') {
+          setError('El servicio de voz no pudo conectar con el servidor de reconocimiento (error network). Usa el cuadro de texto para tomar notas o prueba en Chrome/Brave con conexión activa.');
+        } else if (event.error === 'audio-capture') {
+          setError('El micrófono está ocupado por otra aplicación (ej. la videollamada de Jitsi). Libéralo o usa el cuadro de texto.');
         } else if (event.error !== 'no-speech') {
-          setError(`Error en reconocimiento de voz: ${event.error}`);
+          setError(`Aviso de voz (${event.error}). Puedes continuar editando manualmente.`);
         }
       };
 
       recognition.onend = () => {
-        // Si el usuario no lo detuvo explícitamente, reanudar para mantener continuous listening
         if (isListeningRef.current) {
           try {
             recognition.start();
           } catch (e) {
-            console.error('Error reanudando reconocimiento:', e);
+            console.warn('Error reanudando reconocimiento:', e);
+            setIsListening(false);
+            isListeningRef.current = false;
           }
         } else {
           setIsListening(false);
@@ -83,7 +95,7 @@ export function useSpeechRecognition() {
     } catch (err) {
       console.error('Error inicializando SpeechRecognition:', err);
       setIsSupported(false);
-      setError('Error al iniciar el reconocedor de voz.');
+      setError('No se pudo inicializar el servicio de voz.');
     }
 
     return () => {
