@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import JitsiMeeting from './components/JitsiMeeting';
 import TranscriptPanel from './components/TranscriptPanel';
 import SummaryCards from './components/SummaryCards';
@@ -40,6 +40,10 @@ export default function App() {
       setInMeeting(true);
     }
   };
+
+  const handleMeetingLeave = useCallback(() => {
+    setInMeeting(false);
+  }, []);
 
   const handleGenerateSummary = async () => {
     if (!transcript.trim()) return;
@@ -256,7 +260,7 @@ export default function App() {
                 <JitsiMeeting
                   meetingInput={meetingInput}
                   displayName={userName}
-                  onLeave={() => setInMeeting(false)}
+                  onLeave={handleMeetingLeave}
                 />
               </div>
 
