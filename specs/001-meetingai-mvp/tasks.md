@@ -1,23 +1,24 @@
 # Tareas: MeetingAI MVP
 
-- [ ] **T1: UI Inicial y Jitsi IFrame**
-  - Crear el router básico o condicionales (Dashboard -> MeetingRoom).
-  - Cargar SDK de `meet.jit.si` y renderizar div principal.
-  - *Hecho cuando:* El usuario entra a la app, ve los colores oscuros (#121212) y puede iniciar una videollamada integrada.
+- [x] **T1: Scaffold, UI Inicial y Jitsi**
+  - Inicializar Vite + React + Tailwind en `/client`.
+  - Inicializar Express + CORS + dotenv en `/server`.
+  - Cargar SDK de Jitsi IFrame API y renderizar vista con tema oscuro (`#121212`) y acentos (`#8b5cf6`).
+  - *Criterio de aceptación / Hecho cuando:* El cliente y servidor corran simultáneamente, y Jitsi cargue en pantalla oscura.
 
-- [ ] **T2: Captura de Voz y Controles**
-  - Implementar hook `useTranscription.js`.
-  - Crear UI lateral con botones de Iniciar/Pausar/Detener y un `<textarea>` para el modo fallback.
-  - *Hecho cuando:* Al hablar al micrófono (o escribir a mano), el texto se almacene en el estado de React.
+- [x] **T2: Captura de Voz y Controles**
+  - Implementar custom hook de Web Speech API nativa (grabar/pausar/reanudar/limpiar).
+  - Integrar textarea de fallback editable y sincronizado.
+  - *Criterio de aceptación / Hecho cuando:* El usuario pueda dictar por voz y ver la transcripción en vivo, o ingresar/editar texto manualmente.
 
-- [ ] **T3: Backend y Adaptación a DeepSeek / Gemma Local**
-  - Crear endpoint POST `/api/meetings/summarize`.
-  - Configurar la petición HTTP (vía `fetch`) apuntando a `https://api.deepseek.com/v1/chat/completions` (con API Key) o a `http://localhost:11434/api/generate` (Gemma en Ollama, sin API Key).
-  - Escribir el prompt restrictivo exigiendo el JSON del plan.
-  - *Hecho cuando:* Al enviar un texto de prueba vía Postman, el backend se comunique con DeepSeek o Gemma local y devuelva el JSON estructurado.
+- [x] **T3: Backend y Adaptación a IA (DeepSeek/Gemma)**
+  - Implementar endpoint `POST /api/meetings/summarize`.
+  - Conexión con `fetch` nativo hacia DeepSeek API y Ollama local (Gemma).
+  - Garantizar respuesta en JSON estricto (`resumen`, `puntos_clave`, `decisiones`, `tareas`, `preguntas`). Prohibido SDK OpenAI.
+  - *Criterio de aceptación / Hecho cuando:* El endpoint devuelva un JSON estructurado válido consumiendo DeepSeek u Ollama.
 
-- [ ] **T4: Flujo Completo y Renderizado**
-  - Conectar el botón "Generar Resumen" del frontend al backend enviando la transcripción acumulada.
-  - Crear vista `SummaryReport.jsx` usando grid de Tailwind y tarjetas violetas (#8b5cf6).
-  - Añadir función "Copiar al portapapeles" en Markdown.
-  - *Hecho cuando:* La app permita grabar la voz en la reunión, generar el reporte y copiar el resultado.
+- [x] **T4: Flujo Completo y UI de Resultados**
+  - Conectar frontend con endpoint `/api/meetings/summarize`.
+  - Renderizar tarjetas estilizadas para cada sección del JSON.
+  - Botón de copiado con formato Markdown completo al portapapeles.
+  - *Criterio de aceptación / Hecho cuando:* Una transcripción real o manual genere el resumen estructurado en tarjetas copiables a Markdown en la interfaz.
