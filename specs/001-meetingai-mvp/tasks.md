@@ -14,7 +14,7 @@
 - [x] **T3: Backend y Adaptación a IA (DeepSeek/Gemma)**
   - Implementar endpoint `POST /api/meetings/summarize`.
   - Conexión con `fetch` nativo hacia DeepSeek API y Ollama local (Gemma).
-  - Garantizar respuesta en JSON estricto (`resumen`, `puntos_clave`, `decisiones`, `tareas`, `preguntas`). Prohibido SDK OpenAI.
+  - Garantizar respuesta en JSON estricto (`resumen`, `puntos_clave`, `decisiones`, `tareas`, `preguntas`).
   - *Criterio de aceptación / Hecho cuando:* El endpoint devuelva un JSON estructurado válido consumiendo DeepSeek u Ollama.
 
 - [x] **T4: Flujo Completo y UI de Resultados**
